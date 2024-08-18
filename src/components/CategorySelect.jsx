@@ -1,0 +1,99 @@
+import { useEffect, useMemo } from "react";
+import { Controller, useWatch } from "react-hook-form";
+import Select from "react-tailwindcss-select";
+import { useGetCategoriesQuery } from "../app/features/data/dataApi";
+
+export default function CategorySelect({ control, setValue, errors }) {
+  // redux query data fetching...
+  const {
+    isLoading,
+    isError,
+    error,
+    data: categoryData,
+  } = useGetCategoriesQuery();
+
+  // find the input array
+  const categories = useWatch({ control, name: "category" });
+
+  // set the category id from categories array
+  useEffect(() => {
+    if (categories?.length > 0) {
+      setValue(
+        "categories",
+        categories?.map((category) => category?.value),
+        {
+          shouldValidate: true,
+        }
+      );
+    }
+  }, [categories, setValue]);
+
+  // prepare categories select options
+  const options = useMemo(() => {
+    if (categoryData?.result?.data?.length > 0) {
+      return categoryData?.result?.data?.map((category) => {
+        return { label: category?.name, value: category?.id };
+      });
+    } else {
+      return [{ label: "None", value: null, disabled: true }];
+    }
+  }, [categoryData?.result?.data]);
+
+  return (
+    <div className="mt-4">
+      <label className="block mb-2 text-sm font-medium text-gray-900">
+        Categories <span className="text-red-600">*</span>
+      </label>
+
+      <Controller
+        name="category"
+        id="category"
+        control={control}
+        render={({ field: { ref, ...rest } }) => {
+          return (
+            <Select
+              {...rest}
+              inputRef={ref}
+              placeholder={"Select categories"}
+              options={options}
+              isClearable={true}
+              isMultiple={true}
+              isSearchable={true}
+              isDisabled={isError}
+              loading={isLoading}
+              classNames={{
+                menuButton: ({ isDisabled }) =>
+                  `flex items-center min-h-[42px] text-sm text-gray-500 font-medium border border-gray-300 transition-all duration-300 outline-none focus:outline-none ${
+                    isDisabled
+                      ? "bg-gray-200"
+                      : "bg-gray-100 hover:border-gray-500"
+                  }`,
+
+                menu: "absolute z-10 w-full bg-gray-50 shadow-lg py-3 mt-1 text-sm text-gray-800",
+
+                listItem: ({ isSelected }) =>
+                  `block transition duration-200 px-3 py-2 cursor-pointer select-none truncate ${
+                    isSelected
+                      ? `text-white bg-blue-500`
+                      : `text-gray-800 font-medium hover:bg-blue-100 hover:text-blue-600`
+                  }`,
+              }}
+            />
+          );
+        }}
+      />
+
+      {isError && (
+        <span className="text-sm text-red-500 font-medium mt-2 block text-left">
+          {error?.error}
+        </span>
+      )}
+
+      {errors?.categories && (
+        <span className="text-sm text-red-500 font-medium mt-1 block">
+          {errors?.categories?.message}
+        </span>
+      )}
+    </div>
+  );
+}

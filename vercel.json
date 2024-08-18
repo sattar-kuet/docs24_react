@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/dm/:path(.*)",
+      "destination": "https://portal.docs24.store/dm/:path"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
