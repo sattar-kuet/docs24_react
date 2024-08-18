@@ -6,7 +6,7 @@ import { useGetEmailTemplateQuery } from "../app/features/email/emailApi";
 import QuoteForm from "./QuoteForm";
 import PaySlipForm from "./PaySlipForm";
 import CommonMailClientProjectForm from "./CommonMailClientProjectForm";
-import InvoiceForm from "./invoiceForm";
+import InvoiceForm from "./InvoiceForm";
 import PurchaseOrderForm from "./PurchaseOrderForm";
 
 export default function EmailTamplateSelect({
