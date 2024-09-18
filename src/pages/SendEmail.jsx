@@ -15,6 +15,7 @@ import CustomButton from "../components/common/LoadingButton";
 import Layout from "../components/layout/Layout";
 import { sendEmailSchema } from "../utils/schema/sendEmailSchema";
 import UploadAttachment from "../components/UploadAttachment";
+import dayjs from "dayjs";
 
 const SEND_EMAIL_DEFAULT_VALUES = {
   sender_date: "",
@@ -105,10 +106,13 @@ export default function SendEmail() {
     }
 
     if (data) {
+      const formatEffectedDate = dayjs(data?.sender_date).format("D MMMM YYYY");
+
       const emailData = {
         params: {
-          uid: userInfo?.uid,
           ...data,
+          uid: userInfo?.uid,
+          effective_date: formatEffectedDate,
         },
       };
 
