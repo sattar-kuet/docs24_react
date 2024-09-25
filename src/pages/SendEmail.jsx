@@ -25,7 +25,7 @@ const SEND_EMAIL_DEFAULT_VALUES = {
   client_aadress: "",
   effective_date: "",
   date_range: "",
-  delay: 0,
+  delay: 1,
   reference: "",
   employment: "",
   employment_basis: "",

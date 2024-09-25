@@ -6,7 +6,10 @@ export const sendEmailSchema = yup.object({
   contacts: yup.array().required("Contact is required"),
   bsb_invoice: yup.string().max(6, "BSB must be 6 characters"),
 
-  delay: yup.number().typeError("Invalid Number"),
+  delay: yup
+    .number()
+    .typeError("Invalid Delay Number")
+    .positive("Delay should be greater than ZERO"),
   annual_salary: yup.number().typeError("Invalid Number"),
   accrued1: yup.number().typeError("Invalid Number"),
   accrued2: yup.number().typeError("Invalid Number"),

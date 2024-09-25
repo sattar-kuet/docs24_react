@@ -6,12 +6,13 @@ import { Tooltip, Typography } from "@material-tailwind/react";
 import { useEffect } from "react";
 
 const GST_CalculationFields = ({ control, watch, setValue }) => {
+  // ===================== HOOKS =====================
   const { fields, append, remove } = useFieldArray({
     control,
     name: "items",
   });
 
-  // -> CALCULATIONS
+  // ===================== CALCULATIONS =====================
   const subTotal = watch("items")?.reduce((acc, curr) => {
     return (acc =
       acc + parseFloat(curr.quantity) * parseFloat(curr.unit_price));
@@ -27,11 +28,25 @@ const GST_CalculationFields = ({ control, watch, setValue }) => {
 
   const totalAUD = subTotal + totalGst;
 
-  // watch values
+  // ================== WATCH VALUES ==================
   const itemQuantity = (index) => watch(`items[${index}].quantity`);
   const itemUnitPrice = (index) => watch(`items[${index}].unit_price`);
+  const isGst = (index) => watch(`items[${index}].isGst`);
 
-  // side effects
+  // ================== FUNCTIONS ==================
+  // AUD = Quantity * Unit Price
+
+  // set gst value with calculation function
+  const handleSetGstValue = (isGstCondition, index, aud) => {
+    // set gst value
+    if (isGstCondition) {
+      setValue(`items[${index}].gst`, (parseFloat(aud) * 10) / 100);
+    } else {
+      setValue(`items[${index}].gst`, 0);
+    }
+  };
+
+  // ================== SIDE EFFECTS ==================
   useEffect(() => {
     setValue("sub_total", subTotal);
     setValue("total_gst", totalGst);
@@ -44,6 +59,7 @@ const GST_CalculationFields = ({ control, watch, setValue }) => {
       <div className="flex justify-between items-center gap-1 bg-gray-100 my-3">
         <CustomButton
           color="blue"
+          type={"button"}
           className="text-xl"
           onClick={() => {
             append({
@@ -70,120 +86,136 @@ const GST_CalculationFields = ({ control, watch, setValue }) => {
           </Typography>
         </div>
       </div>
-      {fields.map((field, index) => (
-        <div key={index} className="bg-gray-100 mt-2 p-3 relative">
-          <div className="grid grid-cols-2 gap-1">
-            <CommonInputField
-              control={control}
-              formData={[
-                {
-                  name: `items[${index}].item`,
-                  type: "select",
-                  label: "Select Item",
-                  required: true,
-                  disableMargin: true,
-                  options: [
-                    { label: "M2", value: "M2" },
-                    { label: "M3", value: "M3" },
-                    { label: "Lm", value: "LM" },
-                    { label: "Ton", value: "Ton" },
-                    { label: "Kg", value: "Kg" },
-                    { label: "Item", value: "Item" },
-                    { label: "Box", value: "Box" },
-                    { label: "Other", value: "Other" },
-                    { label: "None", value: "None" },
-                  ],
-                },
-                {
-                  name: `items[${index}].description`,
-                  type: "text",
-                  label: "Description",
-                  required: true,
-                  placeholder: "Description",
-                  disableMargin: true,
-                },
-                {
-                  name: `items[${index}].quantity`,
-                  type: "number",
-                  label: "Quantity",
-                  required: true,
-                  placeholder: "Quantity",
-                  disableMargin: true,
-                },
-                {
-                  name: `items[${index}].unit_price`,
-                  type: "number",
-                  label: "Unit Price",
-                  required: true,
-                  placeholder: "Unit Price",
-                  disableMargin: true,
-                },
-                {
-                  name: `items[${index}].isGst`,
-                  type: "select",
-                  label: "Select GST",
-                  required: true,
-                  disableMargin: true,
-                  manualOnChange: (e) => {
-                    // calculation gst = (AUD *10)/100
-
-                    // get aud
-                    const aud =
-                      watch(`items[${index}].quantity`) *
-                      watch(`items[${index}].unit_price`);
-
-                    // set gst value
-                    if (e.value) {
-                      setValue(
-                        `items[${index}].gst`,
-                        (parseFloat(aud) * 10) / 100
-                      );
-                    } else {
-                      setValue(`items[${index}].gst`, 0);
-                    }
+      {fields.map((field, index) => {
+        return (
+          <div key={field.id} className="bg-gray-100 mt-2 p-3 relative">
+            <div className="grid grid-cols-2 gap-1">
+              <CommonInputField
+                control={control}
+                formData={[
+                  {
+                    name: `items[${index}].item`,
+                    type: "select",
+                    label: "Select Item",
+                    required: true,
+                    disableMargin: true,
+                    options: [
+                      { label: "M2", value: "M2" },
+                      { label: "M3", value: "M3" },
+                      { label: "Lm", value: "LM" },
+                      { label: "Ton", value: "Ton" },
+                      { label: "Kg", value: "Kg" },
+                      { label: "Item", value: "Item" },
+                      { label: "Box", value: "Box" },
+                      { label: "Other", value: "Other" },
+                      { label: "None", value: "None" },
+                    ],
                   },
+                  {
+                    name: `items[${index}].description`,
+                    type: "text",
+                    label: "Description",
+                    required: true,
+                    placeholder: "Description",
+                    disableMargin: true,
+                  },
+                  {
+                    name: `items[${index}].quantity`,
+                    type: "number",
+                    label: "Quantity",
+                    required: true,
+                    placeholder: "Quantity",
+                    disableMargin: true,
+                    manualOnChange: ({ target }) => {
+                      // calculation gst = (AUD *10)/100
 
-                  options: [
-                    { label: "GST", value: true },
-                    { label: "No GST", value: false },
-                  ],
-                },
-              ]}
-            />
+                      // get aud
+                      const aud = target.value * itemUnitPrice(index);
 
-            <Typography color="black" variant="small" className="font-semibold">
-              Amount AUD:{" "}
-              {
-                // calculation of Amount AUD = Quantity * Unit Price;
-                itemQuantity(index) * itemUnitPrice(index)
-              }
-            </Typography>
+                      const getIsGst = isGst(index);
 
-            {!!watch(`items[${index}].gst`) && (
+                      handleSetGstValue(getIsGst, index, aud);
+                    },
+                  },
+                  {
+                    name: `items[${index}].unit_price`,
+                    type: "number",
+                    label: "Unit Price",
+                    required: true,
+                    placeholder: "Unit Price",
+                    disableMargin: true,
+                    manualOnChange: ({ target }) => {
+                      // calculation gst = (AUD *10)/100
+
+                      // get aud
+                      const aud = itemQuantity(index) * target.value;
+
+                      const getIsGst = isGst(index);
+
+                      handleSetGstValue(getIsGst, index, aud);
+                    },
+                  },
+                  {
+                    name: `items[${index}].isGst`,
+                    type: "select",
+                    label: "Select GST",
+                    required: true,
+                    disableMargin: true,
+                    manualOnChange: (e) => {
+                      // calculation gst = (AUD *10)/100
+
+                      // get aud
+                      const aud = itemQuantity(index) * itemUnitPrice(index);
+
+                      handleSetGstValue(e.value, index, aud);
+                    },
+
+                    options: [
+                      { label: "GST", value: true },
+                      { label: "No GST", value: false },
+                    ],
+                  },
+                ]}
+              />
+
               <Typography
                 color="black"
                 variant="small"
                 className="font-semibold"
               >
-                GST: {watch(`items[${index}].gst`)}
+                Amount AUD:{" "}
+                {
+                  // calculation of Amount AUD = Quantity * Unit Price;
+                  itemQuantity(index) * itemUnitPrice(index)
+                }
               </Typography>
-            )}
-          </div>
 
-          <Tooltip content="Remove Item">
-            <button
-              size="sm"
-              onClick={() => {
-                remove(field.id);
-              }}
-              color="red"
-              className="absolute -top-2 -right-2  rounded-full p-1 bg-red-700 text-red-50 hover:bg-red-800 hover:text-red-100"
-            >
-              <MdClose />
-            </button>
-          </Tooltip>
-        </div>
-      ))}
+              {isGst(index) && (
+                <Typography
+                  color="black"
+                  variant="small"
+                  className="font-semibold"
+                >
+                  GST: {watch(`items[${index}].gst`)}
+                </Typography>
+              )}
+            </div>
+
+            {/* REMOVE INDIVIDUAL FIELD ARRAY ITEM */}
+            <Tooltip content="Remove Item">
+              <button
+                size="sm"
+                onClick={() => remove(index)}
+                type="button"
+                color="red"
+                className="absolute -top-2 -right-2  rounded-full p-1 bg-red-700 text-red-50 hover:bg-red-800 hover:text-red-100"
+              >
+                <MdClose />
+              </button>
+            </Tooltip>
+          </div>
+        );
+      })}
     </div>
   );
 };

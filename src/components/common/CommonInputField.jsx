@@ -196,16 +196,16 @@ const CommonInputField = ({ formData, control }) => {
                   <Fragment key={`field-${index}`}>
                     <div className="border mt-1 border-gray-300 flex items-center h-[42px] hover:border-gray-500 transition-all duration-300">
                       <input
+                        {...field}
                         type={item.type}
                         className="text-gray-900 text-sm font-normal outline-none w-full h-full px-3"
                         placeholder={item.placeholder}
-                        {...field}
                         disabled={item.disabled}
                         onChange={
                           item.manualOnChange
                             ? (event) => {
                                 item.manualOnChange(event);
-                                return field.onChange(event);
+                                return field.onChange(event.target.value);
                               }
                             : field.onChange
                         }
