@@ -34,12 +34,12 @@ export const sendEmailSchema = yup.object({
           .number()
           .required("Quantity is required")
           .typeError("Quantity is required")
-          .positive("Quantity should be greater than ZERO"),
+          .min(0, "Quantity should be ZERO or greater then ZERO "),
         unit_price: yup
           .number()
           .required("Unit Price is required")
           .typeError("Unit Price is required")
-          .positive("Unit Price should be greater than ZERO"),
+          .min(0, "Unit Price should be ZERO or greater then ZERO "),
         gst: yup.number().optional(),
       })
     )
